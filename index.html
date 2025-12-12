@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indice de Savoir</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #F0F2F5;
+            --surface: #FFFFFF;
+            --primary: #2962FF; /* Bleu Néon Electrique */
+            --primary-glow: rgba(41, 98, 255, 0.35);
+            --text-main: #111827;
+            --text-light: #9CA3AF;
+            --border: #E5E7EB;
+            --success: #00C853;
+            --error: #D50000;
+            --radius: 20px;
+            --shadow: 0 10px 30px -10px rgba(0,0,0,0.08);
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; display: flex; justify-content: center; min-height: 100vh; }
+        #app { width: 100%; max-width: 500px; background: var(--bg-body); min-height: 100vh; display: flex; flex-direction: column; position: relative; }
+
+        /* HEADER */
+        header { background: var(--surface); padding: 25px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+        .app-title { font-weight: 800; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-main); }
+        .score-badge { background: var(--primary); color: white; padding: 8px 18px; border-radius: 50px; font-weight: 800; font-size: 1.1rem; box-shadow: 0 0 15px var(--primary-glow); text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+
+        /* CONTENT */
+        .content-area { flex: 1; padding: 30px 20px; overflow-y: auto; }
+        h2 { font-size: 1.4rem; margin-bottom: 20px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
+
+        /* CARDS */
+        .card { background: var(--surface); padding: 24px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 15px; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; position: relative; overflow: hidden; }
+        .card:hover { transform: translateY(-4px); border-color: var(--primary); box-shadow: 0 15px 30px -5px var(--primary-glow); }
+        .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .card-name { font-weight: 700; font-size: 1.1rem; }
+        .card-percent { font-weight: 800; color: var(--primary); }
+        .progress-track { height: 6px; background: #F3F4F6; border-radius: 10px; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--primary); border-radius: 10px; box-shadow: 0 0 10px var(--primary-glow); transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+
+        /* NAV & QUIZ */
+        .btn-back { background: white; border: 1px solid var(--border); padding: 10px 20px; border-radius: 30px; font-weight: 600; font-size: 0.9rem; cursor: pointer; margin-bottom: 20px; display: inline-flex; align-items: center; color: var(--text-main); box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: all 0.2s; }
+        .btn-back-right { background: white; border: 1px solid var(--border); padding: 5px 10px; border-radius: 30px; font-weight: 600; font-size: 0.9rem; cursor: pointer; margin-bottom: 20px; float:right;align-items: center; color: var(--text-main); box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: all 0.2s; }
+        .btn-back:hover { transform: scale(1.05); border-color: var(--primary); color: var(--primary); }
+        .quiz-tag { display: inline-block; background: #E3F2FD; color: var(--primary); font-size: 0.7rem; font-weight: 800; padding: 6px 12px; border-radius: 8px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .question-text { font-size: 1.3rem; font-weight: 700; line-height: 1.5; margin-bottom: 30px; }
+        .option-btn { width: 100%; background: var(--surface); padding: 20px; border-radius: 16px; border: 2px solid #F3F4F6; text-align: left; font-size: 1rem; color: var(--text-main); font-weight: 600; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; }
+        .option-btn:hover { border-color: var(--primary); box-shadow: 0 5px 15px var(--primary-glow); transform: scale(1.01); }
+
+        /* MODALS */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); backdrop-filter: blur(8px); z-index: 100; display: none; justify-content: center; align-items: center; padding: 20px; }
+        .modal-card { background: var(--surface); padding: 40px 30px; border-radius: 30px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 20px 60px rgba(41, 98, 255, 0.15); border: 1px solid rgba(255,255,255,0.5); animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-icon { font-size: 3.5rem; margin-bottom: 15px; display: block; }
+        .modal-title { font-size: 1.4rem; font-weight: 800; margin: 0 0 10px 0; color: var(--text-main); }
+        .modal-text { color: var(--text-light); margin-bottom: 30px; line-height: 1.5; }
+        .btn-primary { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; box-shadow: 0 5px 15px var(--primary-glow); transition: transform 0.2s; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px var(--primary-glow); }
+
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <div class="app-title">Indice de Savoir</div>
+        <div class="score-badge" id="ui-global-score">0.0</div>
+    </header>
+
+    <div id="view-dashboard" class="content-area">
+        <div id="list-categories"></div>
+    </div>
+
+    <div id="view-levels" class="content-area" style="display:none;">
+        <button class="btn-back-right" onclick="navTo('dashboard')">← Retour</button>
+        <h2 id="lvl-cat-title">Titre</h2>
+        <div id="list-levels"></div>
+    </div>
+
+    <div id="view-quiz" class="content-area" style="display:none;">
+        <button class="btn-back-right" onclick="navTo('levels')">✕</button>
+        <div style="margin-top:10px;">
+            <span class="quiz-tag" id="q-badge">Difficulté</span>
+            <div class="question-text" id="q-text">...</div>
+            <div id="q-options"></div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-feedback" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-icon" id="fb-icon"></div>
+        <h3 class="modal-title" id="fb-title"></h3>
+        <p class="modal-text" id="fb-text"></p>
+        <button class="btn-primary" onclick="nextQuestion()">Continuer</button>
+    </div>
+</div>
+
+<div id="modal-info" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-icon">🏆</div>
+        <h3 class="modal-title" id="info-title">Terminé</h3>
+        <p class="modal-text" id="info-text">Vous avez validé toutes les connaissances.</p>
+        <button class="btn-primary" onclick="closeInfoModal(); navTo('levels')">Retour au menu</button>
+    </div>
+</div>
+
+<script>window.QUIZ_DB = []; // On vide le lac de données avant de remplir</script>
+
+<script src="data_culture.js"></script>
+<script src="data_brico.js"></script>
+<script src="data_cuisine.js"></script>
+<script src="data_droit.js"></script>
+<script src="data_sante.js"></script>
+
+<script>
+    const POINTS = { 1:10, 2:5, 3:3, 4:2, 5:1 };
+    let userProgress = JSON.parse(localStorage.getItem('neonV2Progress')) || {};
+    let currentCat = null;
+    let currentLevel = null;
+    let sessionBag = []; 
+    let currentQ = null;
+    let lastQuestionId = null; // VARIABLE AJOUTÉE POUR MÉMOIRE ANTI-RÉPÉTITION
+
+    // Vérification si fichiers manquants
+    window.onload = function() {
+        if(window.QUIZ_DB.length === 0) {
+            window.QUIZ_DB = [{id:"demo",name:"⚠️ Erreur Données",levels:[{id:"l1",name:"Fichiers manquants",difficulty:1,questions:[{id:"err1",q:"Les fichiers themes sont-ils dans le dossier ?",options:["Je vais vérifier"],a:0,exp:"Assure-toi que theme_culture.js etc sont bien créés."}]}]}];
+        }
+        init();
+    };
+
+    function init() { updateScoreUI(); renderDashboard(); }
+
+    function updateScoreUI() {
+        let total = 0, user = 0;
+        window.QUIZ_DB.forEach(cat => cat.levels.forEach(lvl => lvl.questions.forEach(q => {
+            total += POINTS[lvl.difficulty];
+            if(userProgress[q.id]) user += POINTS[lvl.difficulty];
+        })));
+        const score = total === 0 ? 0 : (user/total)*100;
+        document.getElementById('ui-global-score').innerText = score.toFixed(1);
+    }
+
+    function saveProgress(id) {
+        userProgress[id] = true;
+        localStorage.setItem('neonV2Progress', JSON.stringify(userProgress));
+        updateScoreUI();
+    }
+
+    function navTo(view) {
+        ['dashboard', 'levels', 'quiz'].forEach(v => document.getElementById('view-'+v).style.display = 'none');
+        document.getElementById('view-'+view).style.display = 'block';
+        if(view === 'dashboard') renderDashboard();
+        if(view === 'levels' && currentCat) renderLevels();
+    }
+
+    function showInfoModal(title, text) {
+        document.getElementById('info-title').innerText = title;
+        document.getElementById('info-text').innerText = text;
+        document.getElementById('modal-info').style.display = 'flex';
+    }
+    function closeInfoModal() { document.getElementById('modal-info').style.display = 'none'; }
+
+    function renderDashboard() {
+        const list = document.getElementById('list-categories');
+        list.innerHTML = '';
+        window.QUIZ_DB.forEach(cat => {
+            let t=0, d=0;
+            cat.levels.forEach(l => l.questions.forEach(q => { t++; if(userProgress[q.id]) d++; }));
+            const pct = t===0 ? 0 : (d/t)*100;
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.onclick = () => { currentCat = cat; navTo('levels'); };
+            div.innerHTML = `<div class="card-top"><div class="card-name">${cat.name}</div><div class="card-percent">${Math.round(pct)}%</div></div><div class="progress-track"><div class="progress-bar" style="width:${pct}%"></div></div>`;
+            list.appendChild(div);
+        });
+    }
+
+    function renderLevels() {
+        document.getElementById('lvl-cat-title').innerText = currentCat.name;
+        const list = document.getElementById('list-levels');
+        list.innerHTML = '';
+        let locked = false;
+        currentCat.levels.forEach(lvl => {
+            let d=0; lvl.questions.forEach(q => { if(userProgress[q.id]) d++; });
+            const isComplete = d === lvl.questions.length;
+            const div = document.createElement('div');
+            div.className = 'card';
+            if(locked) {
+                div.style.opacity = '0.5'; div.style.cursor = 'default';
+                div.innerHTML = `<div class="card-name" style="color:#999">🔒 ${lvl.name}</div>`;
+            } else {
+                div.onclick = () => startLevel(lvl);
+                div.innerHTML = `<div class="card-top"><div class="card-name">${isComplete ? '✅' : '▶️'} ${lvl.name}</div><div style="font-size:0.8rem; color:#666">Niv ${lvl.difficulty}</div></div><div class="progress-track"><div class="progress-bar" style="width:${(d/lvl.questions.length)*100}%"></div></div>`;
+            }
+            list.appendChild(div);
+            if(!isComplete) locked = true;
+        });
+    }
+
+    function startLevel(lvl) {
+        currentLevel = lvl;
+        sessionBag = lvl.questions.filter(q => !userProgress[q.id]);
+        lastQuestionId = null; // RESET de la mémoire quand on lance un niveau
+
+        if(sessionBag.length === 0) { showInfoModal("Niveau complété", "Vous passez en mode révision (pas de points)."); sessionBag = [...lvl.questions]; }
+        navTo('quiz'); pickQuestion();
+    }
+
+    // --- CORRECTION ANTI-RÉPÉTITION ---
+    function pickQuestion() {
+        if(sessionBag.length === 0) { showInfoModal("Bravo !", "Vous avez terminé toutes les questions."); return; }
+        
+        let idx;
+        let candidateQ;
+
+        // Si on a plus d'une question, on boucle tant qu'on tombe sur la même que la dernière fois
+        if (sessionBag.length > 1) {
+             do {
+                idx = Math.floor(Math.random() * sessionBag.length);
+                candidateQ = sessionBag[idx];
+            } while (candidateQ.id === lastQuestionId);
+        } else {
+            // S'il ne reste qu'une seule question, pas le choix, on la prend
+            idx = 0;
+            candidateQ = sessionBag[0];
+        }
+
+        currentQ = candidateQ;
+        lastQuestionId = currentQ.id; // On mémorise celle-ci pour le prochain tour
+
+        // Affichage
+        document.getElementById('q-badge').innerText = `Niveau ${currentLevel.difficulty}`;
+        document.getElementById('q-text').innerText = currentQ.q;
+        const opts = document.getElementById('q-options'); opts.innerHTML = '';
+        currentQ.options.forEach((opt, index) => {
+            const btn = document.createElement('button'); btn.className = 'option-btn'; btn.innerText = opt; btn.onclick = () => check(index); opts.appendChild(btn);
+        });
+    }
+
+    function check(idx) {
+        const modal = document.getElementById('modal-feedback');
+        modal.style.display = 'flex';
+        document.getElementById('fb-text').innerText = currentQ.exp;
+        
+        if(idx === currentQ.a) {
+            document.getElementById('fb-icon').innerText = "⚡";
+            document.getElementById('fb-title').innerText = "Exact";
+            document.getElementById('fb-title').style.color = "var(--success)";
+            saveProgress(currentQ.id);
+            sessionBag = sessionBag.filter(q => q.id !== currentQ.id);
+        } else {
+            document.getElementById('fb-icon').innerText = "❌";
+            document.getElementById('fb-title').innerText = "Erreur";
+            document.getElementById('fb-title').style.color = "var(--error)";
+            // Ici, on ne retire PAS la question du sac, elle reviendra plus tard.
+            // Grâce à 'lastQuestionId' et 'pickQuestion', elle ne reviendra pas TOUT DE SUITE.
+        }
+    }
+    
+    function nextQuestion() { document.getElementById('modal-feedback').style.display = 'none'; pickQuestion(); }
+</script>
+</body>
+</html>
